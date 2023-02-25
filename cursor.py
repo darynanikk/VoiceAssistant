@@ -13,28 +13,6 @@ class ClickType(Enum):
         return cls[input_type]
 
 
-class CursorMovementType(Enum):
-    UP = "up"
-    DOWN = "down"
-    LEFT = "left"
-    RIGHT = "right"
-
-    @classmethod
-    def get_buy(cls, input_type):
-        return cls[input_type]
-
-
-class Settings:
-    def __init__(self):
-        pass
-
-
-class CursorSettings:
-    def __init__(self, step, lookup_radius):
-        self.step = step
-        self.lookup_radius = lookup_radius
-
-
 class Cursor(abc.ABC):
     @abc.abstractmethod
     def click(self, click_type):
