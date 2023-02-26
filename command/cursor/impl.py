@@ -10,9 +10,15 @@ class CursorClickingCommand(CursorCommand):
 
 class CursorMovementCommand(CursorCommand):
 
-    def move(self, direction: CursorMovementType):
-        # TODO
-        pass
+    def move(self, direction: CursorMovementType, px: int):
+        if direction == CursorMovementType.LEFT:
+            self._cursor.move_left(px)
+        elif direction == CursorMovementType.RIGHT:
+            self._cursor.move_right(px)
+        elif direction == CursorMovementType.UP:
+            self._cursor.move_top(px)
+        elif direction == CursorMovementType.DOWN:
+            self._cursor.move_down(px)
 
     def move_to_center(self):
         self._cursor.move_to_center()
