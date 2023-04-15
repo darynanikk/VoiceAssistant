@@ -1,7 +1,6 @@
-from speech_recognition import Recognizer
-from audio_processing.impl import VoiceProcessorImpl
-from supplier import VoiceSupplier
-from supplier.impl import VoiceSupplierImpl
+from .impl import VoiceProcessorImpl
+from .supplier import VoiceSupplier
+from .supplier.impl import VoiceSupplierImpl
 
 
 class AudioProcessor:
@@ -11,9 +10,3 @@ class AudioProcessor:
 
     def process(self) -> str:
         return self._processor.recognize(self._supplier.supply())
-
-
-class VoiceProcessor:
-    def __init__(self):
-        self.recognizer = Recognizer()
-
