@@ -20,8 +20,9 @@ class Selector:
         while True:
             query = self._processor.process().lower().split()
 
-            if query[0] == 'mouse':
-                mouse_controller = self._controllers.get('mouse')
+            controller = query[0]
+            if controller == 'mouse':
+                mouse_controller = self._controllers.get(controller)
                 mouse_controller.listen()
 
             if query[0] == 'stop':
@@ -41,7 +42,8 @@ class MouseController(Controller):
 
         command = query[0]
         if command == 'move':
-            self._movement.move(CursorMovementType.LEFT, 120)
+            direction = CursorMovementType.get_by(query[1])
+            self._movement.move(direction, 120)
 
 
 class SearchController(Controller):
