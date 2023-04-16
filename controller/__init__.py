@@ -1,5 +1,9 @@
+import logging
+
 import pyautogui
 from typing import Tuple
+
+from audio_processing import AudioProcessor
 
 
 class ScreenSearcher:
@@ -13,7 +17,12 @@ class ScreenSearcher:
 
 
 class Controller:
-    def __init__(self):
+
+    def __init__(self, audio_processor: AudioProcessor):
+        self._audio_processor = audio_processor
+
+    def listen(self):
+        # TODO choose command when listening
         pass
 
 

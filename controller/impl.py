@@ -1,3 +1,5 @@
+import logging
+
 from audio_processing import AudioProcessor
 from typing import Dict
 from command.cursor.impl import CursorClickingCommand, CursorMovementCommand
@@ -10,16 +12,17 @@ class Selector:
 
     def __init__(self):
         self._processor = AudioProcessor()
-        self._controllers: Dict[str, Controller] = {'mouse': MouseController(), 'type': TypingController(),
-                                                    'search': SearchController()}
+        self._controllers: Dict[str, Controller] = {'mouse': MouseController(self._processor),
+                                                    'type': TypingController(self._processor),
+                                                    'search': SearchController(self._processor)}
 
     def listen(self) -> None:
         while True:
             query = self._processor.process().lower().split()
 
-            if query[0] == 'move':
+            if query[0] == 'mouse':
                 mouse_controller = self._controllers.get('mouse')
-                mouse_controller.move()
+                mouse_controller.listen()
 
             if query[0] == 'stop':
                 print('stopped')
@@ -27,15 +30,18 @@ class Selector:
 
 
 class MouseController(Controller):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, audio_processor: AudioProcessor):
+        super().__init__(audio_processor)
         self._clicking = CursorClickingCommand()
         self._movement = CursorMovementCommand()
         self.screen_searcher = ScreenSearcher()
 
     def listen(self):
-        # TODO choose command when listening
-        pass
+        query = self._audio_processor.process().lower().split()
+
+        command = query[0]
+        if command == 'move':
+            self._movement.move(CursorMovementType.LEFT, 120)
 
 
 class SearchController(Controller):
@@ -44,8 +50,9 @@ class SearchController(Controller):
 
 
 class TypingController(Controller):
-    def __init__(self):
-        super().__init__()
+
+    def __init__(self, audio_processor: AudioProcessor):
+        super().__init__(audio_processor)
         self._typing = KeyboardTypingCommand()
 
     def listen(self):
@@ -54,5 +61,6 @@ class TypingController(Controller):
 
 if __name__ == '__main__':
     selector = Selector()
-    selector._controllers.get('mouse').move()
-    selector._controllers.get('type').type_input("hello")
+    selector.listen()
+    # selector._controllers.get('mouse').move()
+    # selector._controllers.get('type').type_input("hello")
