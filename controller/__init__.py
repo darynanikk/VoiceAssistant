@@ -22,7 +22,6 @@ class Controller:
         self._audio_processor = audio_processor
 
     def listen(self):
-        # TODO choose command when listening
         pass
 
 

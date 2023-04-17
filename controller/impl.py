@@ -1,4 +1,6 @@
+import os
 import logging
+import openai
 
 from audio_processing import AudioProcessor
 from typing import Dict
@@ -6,6 +8,8 @@ from command.cursor.impl import CursorClickingCommand, CursorMovementCommand
 from command.keyboard.impl import KeyboardTypingCommand
 from controller import ScreenSearcher, Controller
 from service.cursor import CursorMovementType
+
+openai.api_key = os.environ.get('OPENAI_API_KEY', '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')
 
 
 class Selector:
@@ -24,6 +28,14 @@ class Selector:
             if controller == 'mouse':
                 mouse_controller = self._controllers.get(controller)
                 mouse_controller.listen()
+
+            if controller == 'search':
+                search_controller = self._controllers.get(controller)
+                search_controller.listen()
+
+            if controller == 'type':
+                type_controller = self._controllers.get(controller)
+                type_controller.listen()
 
             if query[0] == 'stop':
                 print('stopped')
@@ -47,8 +59,24 @@ class MouseController(Controller):
 
 
 class SearchController(Controller):
-    # ChatGPT or simple (Wikipedia, StackOverFlow, Google)
-    pass
+    def __init__(self, audio_processor: AudioProcessor):
+        super().__init__(audio_processor)
+        self._engine = os.environ.get('OPENAI_MODEL_ENGINE', 'text-davinci-003')
+
+    def listen(self):
+        prompt = f'search {self._audio_processor.process().lower()}'
+
+        #prompt = 'What\'s the weather today?'  # test
+        completion = openai.Completion.create(
+            engine=self._engine,
+            prompt=prompt,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+
+        print(completion.get("choices")[0].get("text"))
 
 
 class TypingController(Controller):
@@ -58,11 +86,10 @@ class TypingController(Controller):
         self._typing = KeyboardTypingCommand()
 
     def listen(self):
-        pass
+        text = self._audio_processor.process()
+        self._typing.type(text)
 
 
 if __name__ == '__main__':
     selector = Selector()
     selector.listen()
-    # selector._controllers.get('mouse').move()
-    # selector._controllers.get('type').type_input("hello")
