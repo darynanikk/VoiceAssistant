@@ -13,6 +13,8 @@ openai.api_key = os.environ.get('OPENAI_API_KEY', 'sk-3itueNWQHhAAREvSAOptT3Blbk
 
 
 class Selector:
+    # TODO make in one query, exec
+    # TODO SCREEN SEARCHER
 
     def __init__(self):
         self._processor = AudioProcessor()
@@ -27,15 +29,15 @@ class Selector:
             controller = query[0]
             if controller == 'mouse':
                 mouse_controller = self._controllers.get(controller)
-                mouse_controller.listen()
+                mouse_controller.process(query[-1])
 
             if controller == 'search':
                 search_controller = self._controllers.get(controller)
-                search_controller.listen()
+                search_controller.process(query[-1])
 
             if controller == 'type':
                 type_controller = self._controllers.get(controller)
-                type_controller.listen()
+                type_controller.process(query[-1])
 
             if query[0] == 'stop':
                 print('stopped')
@@ -49,11 +51,8 @@ class MouseController(Controller):
         self._movement = CursorMovementCommand()
         self.screen_searcher = ScreenSearcher()
 
-    def listen(self):
-        query = self._audio_processor.process().lower().split()
-
-        command = query[0]
-        if command == 'move':
+    def process(self, query: str):
+        if query == 'move':
             direction = CursorMovementType.get_by(query[1])
             self._movement.move(direction, 120)
 
@@ -63,13 +62,11 @@ class SearchController(Controller):
         super().__init__(audio_processor)
         self._engine = os.environ.get('OPENAI_MODEL_ENGINE', 'text-davinci-003')
 
-    def listen(self):
-        prompt = f'search {self._audio_processor.process().lower()}'
-
-        #prompt = 'What\'s the weather today?'  # test
+    def process(self, query: str):
+        # prompt = 'What\'s the weather today?'  # test
         completion = openai.Completion.create(
             engine=self._engine,
-            prompt=prompt,
+            prompt=query,
             max_tokens=1024,
             n=1,
             stop=None,
@@ -85,9 +82,8 @@ class TypingController(Controller):
         super().__init__(audio_processor)
         self._typing = KeyboardTypingCommand()
 
-    def listen(self):
-        text = self._audio_processor.process()
-        self._typing.type(text)
+    def process(self, query: str):
+        self._typing.type(query)
 
 
 if __name__ == '__main__':

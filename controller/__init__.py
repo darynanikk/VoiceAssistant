@@ -21,7 +21,7 @@ class Controller:
     def __init__(self, audio_processor: AudioProcessor):
         self._audio_processor = audio_processor
 
-    def listen(self):
+    def process(self, query: str):
         pass
 
 
