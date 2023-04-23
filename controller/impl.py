@@ -13,8 +13,6 @@ openai.api_key = os.environ.get('OPENAI_API_KEY', 'sk-3itueNWQHhAAREvSAOptT3Blbk
 
 
 class Selector:
-    # TODO make in one query, exec
-    # TODO SCREEN SEARCHER
 
     def __init__(self):
         self._processor = AudioProcessor()
@@ -29,15 +27,15 @@ class Selector:
             controller = query[0]
             if controller == 'mouse':
                 mouse_controller = self._controllers.get(controller)
-                mouse_controller.process(query[-1])
+                mouse_controller.process(' '.join(query[1:]))
 
             if controller == 'search':
                 search_controller = self._controllers.get(controller)
-                search_controller.process(query[-1])
+                search_controller.process(' '.join(query[1:]))
 
             if controller == 'type':
                 type_controller = self._controllers.get(controller)
-                type_controller.process(query[-1])
+                type_controller.process(' '.join(query[1:]))
 
             if query[0] == 'stop':
                 print('stopped')
@@ -52,8 +50,9 @@ class MouseController(Controller):
         self.screen_searcher = ScreenSearcher()
 
     def process(self, query: str):
-        if query == 'move':
-            direction = CursorMovementType.get_by(query[1])
+        command, movement_type = query.split()
+        if command == 'move':
+            direction = CursorMovementType.get_by(movement_type)
             self._movement.move(direction, 120)
 
 
@@ -63,7 +62,7 @@ class SearchController(Controller):
         self._engine = os.environ.get('OPENAI_MODEL_ENGINE', 'text-davinci-003')
 
     def process(self, query: str):
-        # prompt = 'What\'s the weather today?'  # test
+
         completion = openai.Completion.create(
             engine=self._engine,
             prompt=query,
