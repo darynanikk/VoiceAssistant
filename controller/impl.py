@@ -1,13 +1,14 @@
 import os
 import logging
 import openai
+import pyautogui
 
 from audio_processing import AudioProcessor
 from typing import Dict
 from command.cursor.impl import CursorClickingCommand, CursorMovementCommand
 from command.keyboard.impl import KeyboardTypingCommand
-from controller import ScreenSearcher, Controller
-from service.cursor import CursorMovementType
+from controller import ScreenSearcher, Controller, ScreenSearcherController
+from service.cursor import CursorMovementType, ClickType
 
 openai.api_key = os.environ.get('OPENAI_API_KEY', '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')
 
@@ -50,10 +51,30 @@ class MouseController(Controller):
         self.screen_searcher = ScreenSearcher()
 
     def process(self, query: str):
-        command, movement_type = query.split()
-        if command == 'move':
-            direction = CursorMovementType.get_by(movement_type)
-            self._movement.move(direction, 120)
+        #TODO
+        query = query.split()
+        if query[0] == 'move':
+
+            if query[1] in ['up', 'down', 'left', 'right']:
+                direction = CursorMovementType.get_by(query[1])
+                self._movement.move(direction, 120)
+            else:
+                try:
+
+                    pos, x, y = self.screen_searcher.find_by_str(''.join(query[1:]))
+                    self._movement.move_to(x, y)
+                except:
+                    pass
+
+                # #move next
+                # while 'next' in self._audio_processor.process().lower().split():
+                #     for
+
+        if query[0] == 'click':
+
+            if query[1] in ['middle', 'left', 'right']:
+                click_type = ClickType.get_by(query[1])
+                self._clicking.click(click_type)
 
 
 class SearchController(Controller):
