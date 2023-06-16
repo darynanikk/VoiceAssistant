@@ -11,3 +11,12 @@ class KeyboardImpl(Keyboard):
     def type(self, input: str):
         # interval should be taken from KeyboardSettings instance
         self._delegate.write(input, interval=0.25)
+
+    def press(self, input: str):
+        self._delegate.press(input)
+
+    def hold(self, input: str):
+        self._delegate.hold(input)
+
+    def hotkey(self, *args):
+        self._delegate.hotkey(*args)

@@ -1,6 +1,7 @@
 import os
 import cv2
 import pyautogui
+import time
 
 from typing import Tuple
 from audio_processing import AudioProcessor
@@ -14,7 +15,7 @@ load_dotenv()
 class ScreenSearcherController:
     def __init__(self):
         pyautogui.screenshot('screen.png')
-        self.image = cv2.imread(os.getenv('IMAGE_PATH'))
+        self.image = cv2.imread('screen.png')
         self.reader = Reader(['en'], gpu=True)
 
     def create_list_of_controls(self) -> List:
@@ -32,14 +33,17 @@ class ScreenSearcher:
     @staticmethod
     def find_by_str(input: str) -> Tuple:
         control_position = 0
+        start =  time.time()
         screen_searcher_controller = ScreenSearcherController()
         controls = screen_searcher_controller.create_list_of_controls()
+        print(input)
 
         for text, top_left_x, top_left_y in controls:
             control_position += 1
-            print(text)
+            print(text.lower())
             if text.lower() == input.lower():
-                print(text)
+                end = time.time()
+                print(end-start)
                 return control_position, top_left_x, top_left_y
         raise Exception(f"Could not found control {input}")
 

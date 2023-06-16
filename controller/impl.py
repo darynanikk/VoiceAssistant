@@ -6,7 +6,8 @@ import pyautogui
 from audio_processing import AudioProcessor
 from typing import Dict
 from command.cursor.impl import CursorClickingCommand, CursorMovementCommand
-from command.keyboard.impl import KeyboardTypingCommand
+from command.keyboard.impl import KeyboardTypingCommand, KeyboardPressingCommand, KeyboardHoldingCommand, \
+    KeyboardHotKeyCommand
 from controller import ScreenSearcher, Controller, ScreenSearcherController
 from service.cursor import CursorMovementType, ClickType
 
@@ -32,6 +33,7 @@ class Selector:
 
             if controller == 'search':
                 search_controller = self._controllers.get(controller)
+                # запис в базу
                 search_controller.process(' '.join(query[1:]))
 
             if controller == 'type':
@@ -44,15 +46,13 @@ class Selector:
 
 
 class MouseController(Controller):
-    def __init__(self, audio_processor: AudioProcessor):
+    def __init__(self, audio_processor: AudioProcessor = None):
         super().__init__(audio_processor)
         self._clicking = CursorClickingCommand()
         self._movement = CursorMovementCommand()
         self.screen_searcher = ScreenSearcher()
 
     def process(self, query: str):
-        #TODO
-        query = query.split()
         if query[0] == 'move':
 
             if query[1] in ['up', 'down', 'left', 'right']:
@@ -61,7 +61,7 @@ class MouseController(Controller):
             else:
                 try:
 
-                    pos, x, y = self.screen_searcher.find_by_str(''.join(query[1:]))
+                    pos, x, y = self.screen_searcher.find_by_str(' '.join(query[1:]))
                     self._movement.move_to(x, y)
                 except:
                     pass
@@ -78,12 +78,11 @@ class MouseController(Controller):
 
 
 class SearchController(Controller):
-    def __init__(self, audio_processor: AudioProcessor):
+    def __init__(self, audio_processor: AudioProcessor = None):
         super().__init__(audio_processor)
         self._engine = os.environ.get('OPENAI_MODEL_ENGINE', 'text-davinci-003')
 
     def process(self, query: str):
-
         completion = openai.Completion.create(
             engine=self._engine,
             prompt=query,
@@ -94,18 +93,52 @@ class SearchController(Controller):
         )
 
         print(completion.get("choices")[0].get("text"))
+        return completion.get("choices")[0].get("text")
 
 
 class TypingController(Controller):
 
-    def __init__(self, audio_processor: AudioProcessor):
+    def __init__(self, audio_processor: AudioProcessor = None):
         super().__init__(audio_processor)
         self._typing = KeyboardTypingCommand()
 
     def process(self, query: str):
+        print("lol")
         self._typing.type(query)
+
+
+class PressingController(Controller):
+
+    def __init__(self, audio_processor: AudioProcessor = None):
+        super().__init__(audio_processor)
+        self._pressing = KeyboardPressingCommand()
+
+    def process(self, query: str):
+        self._pressing.press(query)
+
+
+class HoldingController(Controller):
+
+    def __init__(self, audio_processor: AudioProcessor = None):
+        super().__init__(audio_processor)
+        self._holding = KeyboardHoldingCommand()
+
+    def process(self, query: str):
+        self._holding.hold(query)
+
+
+class HotKeyController(Controller):
+
+    def __init__(self, audio_processor: AudioProcessor = None):
+        super().__init__(audio_processor)
+        self._hotkey = KeyboardHotKeyCommand()
+
+    def process(self, *args):
+        self._hotkey.hotkey(*args)
 
 
 if __name__ == '__main__':
     selector = Selector()
     selector.listen()
+
+

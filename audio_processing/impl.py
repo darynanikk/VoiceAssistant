@@ -16,7 +16,7 @@ class VoiceProcessorImpl(VoiceProcessor):
         query = None
         try:
             logger.debug('Recognizing speech...')
-            query = self.recognizer.recognize_google(audio, language='en_gb')
+            query = self.recognizer.recognize_google(audio, language='en_US')
             logger.debug(f'The input speech was: {query}')
         except Exception as exception:
             print(exception)
